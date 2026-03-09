@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Aceleración Digital TVN</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --tvn-blue: #0066CC;
+            --tvn-blue-dark: #004A99;
+            --tvn-red: #E31B23;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            color: var(--gray-900);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        /* Header con glassmorphism */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 2.5rem 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--tvn-blue) 0%, #667eea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+        
+        .update-time {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Hero KPIs */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--tvn-blue), #667eea);
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        .kpi-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray-700);
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+        
+        .kpi-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--tvn-blue), #667eea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .kpi-subtext {
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+        
+        /* Sección principal */
+        .main-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        /* Filtros */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-btn {
+            padding: 0.6rem 1.2rem;
+            border: 2px solid var(--gray-200);
+            background: white;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray-700);
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--tvn-blue);
+            color: var(--tvn-blue);
+        }
+        
+        .filter-btn.active {
+            background: var(--tvn-blue);
+            color: white;
+            border-color: var(--tvn-blue);
+        }
+        
+        /* Timeline Gantt */
+        .timeline-container {
+            margin-bottom: 3rem;
+            overflow-x: auto;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: 16px;
+        }
+        
+        .timeline-header {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-left: 300px;
+        }
+        
+        .timeline-month {
+            min-width: 120px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            padding: 0.5rem;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        /* Sprint Cards */
+        .sprints-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        
+        .sprint-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid var(--tvn-blue);
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .sprint-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .sprint-card.estado-en-curso {
+            border-left-color: var(--success);
+        }
+        
+        .sprint-card.estado-pendiente {
+            border-left-color: var(--warning);
+        }
+        
+        .sprint-card.estado-bloqueado {
+            border-left-color: var(--danger);
+        }
+        
+        .sprint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        
+        .sprint-id {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: linear-gradient(135deg, var(--tvn-blue), #667eea);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        
+        .sprint-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .badge-estado {
+            background: var(--gray-200);
+            color: var(--gray-900);
+        }
+        
+        .badge-en-curso {
+            background: var(--success);
+            color: white;
+        }
+        
+        .badge-pendiente {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .badge-prioridad {
+            background: var(--tvn-red);
+            color: white;
+        }
+        
+        .sprint-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .sprint-objetivo {
+            color: var(--gray-700);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .sprint-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .meta-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray-700);
+            font-weight: 600;
+        }
+        
+        .meta-value {
+            font-size: 0.95rem;
+            color: var(--gray-900);
+            font-weight: 500;
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        
+        .progress-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--tvn-blue);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--tvn-blue), #667eea);
+            border-radius: 10px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Riesgos */
+        .riesgos-section {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .riesgos-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--danger);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        
+        .riesgos-content {
+            font-size: 0.9rem;
+            color: var(--gray-900);
+            line-height: 1.5;
+        }
+        
+        /* Dependencias */
+        .dependencias {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .dep-tag {
+            padding: 0.3rem 0.8rem;
+            background: #e0e7ff;
+            color: #4338ca;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 2rem; }
+            .header { padding: 1.5rem; }
+            .kpi-value { font-size: 2.5rem; }
+            .sprint-meta { grid-template-columns: 1fr; }
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: white;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Cargando sprints de aceleración digital...</p>
+        </div>
+        
+        <div id="dashboard" style="display:none;">
+            <div class="header">
+                <h1>🚀 Aceleración Digital TVN</h1>
+                <p class="subtitle">Dirección Digital · Mapa de iniciativas de transformación digital</p>
+                <div class="update-time">
+                    <span>📅</span>
+                    <span id="update-time"></span>
+                </div>
+            </div>
+            
+            <!-- Hero KPIs -->
+            <div class="kpi-grid" id="kpi-grid"></div>
+            
+            <!-- Timeline Gantt -->
+            <div class="main-section">
+                <div class="section-header">
+                    <h2 class="section-title">📊 Timeline de Sprints</h2>
+                </div>
+                <div class="timeline-container" id="timeline"></div>
+            </div>
+            
+            <!-- Sprints -->
+            <div class="main-section">
+                <div class="section-header">
+                    <h2 class="section-title">🎯 Sprints Activos</h2>
+                    <div class="filters">
+                        <button class="filter-btn active" onclick="filterSprints('todos')">Todos</button>
+                        <button class="filter-btn" onclick="filterSprints('en-curso')">En Curso</button>
+                        <button class="filter-btn" onclick="filterSprints('pendiente')">Pendientes</button>
+                        <button class="filter-btn" onclick="filterSprints('alta')">Prioridad Alta</button>
+                    </div>
+                </div>
+                <div class="sprints-grid" id="sprints-grid"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let data = null;
+        let currentFilter = 'todos';
+        
+        async function loadData() {
+            try {
+                const response = await fetch('sprints_data.json');
+                data = await response.json();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                initDashboard();
+            } catch (error) {
+                document.getElementById('loading').innerHTML = `
+                    <p style="color: #ef4444;">❌ Error cargando datos</p>
+                    <p style="font-size: 0.9rem; margin-top: 1rem;">Asegúrate de que sprints_data.json esté en el mismo directorio.</p>
+                `;
+            }
+        }
+        
+        function initDashboard() {
+            document.getElementById('update-time').textContent = 
+                `Última actualización: ${data.metadata.ultima_actualizacion}`;
+            
+            renderKPIs();
+            renderTimeline();
+            renderSprints();
+        }
+        
+        function renderKPIs() {
+            const stats = data.metadata.estadisticas;
+            const html = `
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Sprints</div>
+                    <div class="kpi-value">${stats.total_sprints}</div>
+                    <div class="kpi-subtext">En roadmap</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">En Curso</div>
+                    <div class="kpi-value">${stats.en_curso}</div>
+                    <div class="kpi-subtext">${stats.pendientes} pendientes</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">Avance Promedio</div>
+                    <div class="kpi-value">${(stats.avance_promedio * 100).toFixed(0)}%</div>
+                    <div class="kpi-subtext">Completitud general</div>
+                </div>
+                
+                <div class="kpi-card">
+                    <div class="kpi-label">Prioridad Alta</div>
+                    <div class="kpi-value">${stats.prioridad_alta}</div>
+                    <div class="kpi-subtext">${stats.con_riesgos} con riesgos</div>
+                </div>
+            `;
+            document.getElementById('kpi-grid').innerHTML = html;
+        }
+        
+        function renderTimeline() {
+            // Generar meses (Mar 2025 - Oct 2025)
+            const months = ['Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct'];
+            
+            let html = '<div class="timeline-header">';
+            months.forEach(month => {
+                html += `<div class="timeline-month">${month} 2025</div>`;
+            });
+            html += '</div>';
+            
+            // TODO: Agregar barras de Gantt por sprint
+            html += '<div style="padding: 2rem; text-align: center; color: var(--gray-700);">';
+            html += '<p>📊 Timeline visual de Gantt en desarrollo</p>';
+            html += '<p style="font-size: 0.9rem; margin-top: 0.5rem;">Mostrará duración y superposición de sprints</p>';
+            html += '</div>';
+            
+            document.getElementById('timeline').innerHTML = html;
+        }
+        
+        function renderSprints() {
+            let sprints = data.sprints;
+            
+            // Filtrar según filtro activo
+            if (currentFilter === 'en-curso') {
+                sprints = sprints.filter(s => s.estado === 'En curso');
+            } else if (currentFilter === 'pendiente') {
+                sprints = sprints.filter(s => s.estado === 'Pendiente');
+            } else if (currentFilter === 'alta') {
+                sprints = sprints.filter(s => s.prioridad === 'Alta');
+            }
+            
+            let html = '';
+            
+            sprints.forEach(sprint => {
+                const estadoClass = sprint.estado.toLowerCase().replace(' ', '-');
+                const avancePct = sprint.avance * 100;
+                
+                html += `
+                    <div class="sprint-card estado-${estadoClass}">
+                        <div class="sprint-header">
+                            <span class="sprint-id">${sprint.id}</span>
+                            <div class="sprint-badges">
+                                <span class="badge badge-${estadoClass}">${sprint.estado}</span>
+                                ${sprint.prioridad === 'Alta' ? '<span class="badge badge-prioridad">Alta Prioridad</span>' : ''}
+                            </div>
+                        </div>
+                        
+                        <h3 class="sprint-title">${sprint.sprint}</h3>
+                        <p class="sprint-objetivo">${sprint.objetivo}</p>
+                        
+                        <div class="sprint-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">👥 Responsables</span>
+                                <span class="meta-value">${sprint.responsables}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">📅 Período</span>
+                                <span class="meta-value">${formatDate(sprint.fecha_inicio)} → ${formatDate(sprint.fecha_termino)}</span>
+                            </div>
+                        </div>
+                        
+                        ${sprint.dependencias ? `
+                            <div class="meta-item" style="margin-bottom: 1rem;">
+                                <span class="meta-label">🔗 Dependencias</span>
+                                <div class="dependencias">
+                                    ${sprint.dependencias.split('·').map(d => `<span class="dep-tag">${d.trim()}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Avance</span>
+                                <span class="progress-value">${avancePct.toFixed(0)}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${avancePct}%"></div>
+                            </div>
+                        </div>
+                        
+                        ${sprint.riesgos && sprint.riesgos.length > 10 ? `
+                            <div class="riesgos-section">
+                                <div class="riesgos-header">
+                                    <span>⚠️</span>
+                                    <span>Riesgos / Bloqueadores</span>
+                                </div>
+                                <div class="riesgos-content">${sprint.riesgos}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${sprint.notas && sprint.notas.length > 10 ? `
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                                <div class="meta-label" style="margin-bottom: 0.5rem;">📝 Notas</div>
+                                <div style="font-size: 0.9rem; color: var(--gray-700);">${sprint.notas}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            document.getElementById('sprints-grid').innerHTML = html;
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/D';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        
+        function filterSprints(filter) {
+            currentFilter = filter;
+            
+            // Actualizar botones
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            renderSprints();
+        }
+        
+        // Iniciar
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>
